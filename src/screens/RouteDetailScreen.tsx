@@ -48,7 +48,7 @@ export default function RouteDetailScreen({ agencies, themeMode }: { agencies: A
   if (!route) return null;
 
   return (
-    <Box sx={{ flex: 1, overflowY: 'auto', px: 2, pb: 3, display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ flex: 1, overflowY: 'auto', overscrollBehaviorY: 'contain', px: 2, pb: 3, display: 'flex', flexDirection: 'column' }}>
       <IconButton onClick={back} sx={{ alignSelf: 'flex-start', ml: -1, mt: 1 }}><ChevronLeftIcon /> <Typography sx={{ textTransform: 'uppercase', fontSize: 13, fontWeight: 700 }}>Volver</Typography></IconButton>
 
       <Box sx={{ bgcolor: route.color, color: onColor(route.color), borderRadius: 1, p: 2, mt: 1.5 }}>

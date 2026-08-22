@@ -18,7 +18,7 @@ export default function RoutesScreen() {
     .sort((a, b) => a.short.localeCompare(b.short, undefined, { numeric: true, sensitivity: 'base' }));
 
   return (
-    <Box sx={{ flex: 1, overflowY: 'auto', px: 2, pb: 3 }}>
+    <Box sx={{ flex: 1, overflowY: 'auto', overscrollBehaviorY: 'contain', px: 2, pb: 3 }}>
       <Typography variant="h5" sx={{ pt: 1.5, mb: 1.5 }}>Rutas</Typography>
 
       <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>

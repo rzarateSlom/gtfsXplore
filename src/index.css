@@ -1,0 +1,6 @@
+/* Evita el gesto nativo de "pull to refresh" del navegador/PWA en Android.
+   contain: el scroll no se "escapa" del contenedor hacia el navegador, pero mantiene
+   el rebote normal dentro de la propia lista/pantalla. */
+html, body, #root {
+  overscroll-behavior-y: contain;
+}

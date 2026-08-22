@@ -8,7 +8,7 @@ export default function ConnectionScreen({ error, cause }: { error?: string; cau
   const steps = cause ? FIXES[cause] : [];
 
   return (
-    <Box sx={{ flex: 1, overflowY: 'auto', px: 2, pb: 3 }}>
+    <Box sx={{ flex: 1, overflowY: 'auto', overscrollBehaviorY: 'contain', px: 2, pb: 3 }}>
       <IconButton onClick={back} sx={{ ml: -1, mt: 1 }}><ChevronLeftIcon /> <Typography sx={{ textTransform: 'uppercase', fontSize: 13, fontWeight: 700 }}>Volver</Typography></IconButton>
       <Typography variant="overline" color="text.secondary" sx={{ display: 'block' }}>GtfsExposeAPI · OpenAPI 3.0</Typography>
       <Typography variant="h5" sx={{ mb: 2 }}>Conexión al feed</Typography>

@@ -36,7 +36,7 @@ export default function HomeScreen({ agencies }: { agencies: Agency[] }) {
   }, [stopsQ.data, query, remote.data, usingDeviceLocation, nearbyQ.data]);
 
   return (
-    <Box sx={{ flex: 1, overflowY: 'auto', px: 2, pb: 3 }}>
+    <Box sx={{ flex: 1, overflowY: 'auto', overscrollBehaviorY: 'contain', px: 2, pb: 3 }}>
       <Box sx={{ pt: 1.5 }}>
         <TextField
           fullWidth size="small" placeholder="Buscar parada" value={query}
