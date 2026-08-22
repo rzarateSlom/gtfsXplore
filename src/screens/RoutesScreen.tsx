@@ -2,23 +2,24 @@ import { Box, Typography, Select, MenuItem, IconButton, List, ListItemButton, Li
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import ChevronRight from '@mui/icons-material/ChevronRight';
-import { useAppStore, loadFavAgency, saveFavAgency } from '../store/useAppStore';
+import { useAppStore } from '../store/useAppStore';
 import { useAgencies, useRoutes } from '../api/queries';
 import RouteBadge from '../components/RouteBadge';
 
 export default function RoutesScreen() {
-  const { agency, setAgency, navToRoute } = useAppStore();
+  const { agency, setAgency, favAgency, toggleFavAgency, navToRoute } = useAppStore();
   const agenciesQ = useAgencies();
   const routesQ = useRoutes();
-  const favId = loadFavAgency();
-  const isFav = !!agency && agency === favId;
+  const isFav = !!agency && agency === favAgency;
 
-  const list = (routesQ.data || []).filter((r) => r.agencyId === agency);
+  const list = (routesQ.data || [])
+    .filter((r) => r.agencyId === agency)
+    .slice()
+    .sort((a, b) => a.short.localeCompare(b.short, undefined, { numeric: true, sensitivity: 'base' }));
 
   return (
     <Box sx={{ flex: 1, overflowY: 'auto', px: 2, pb: 3 }}>
-      <Typography variant="overline" color="text.secondary" sx={{ display: 'block', pt: 1.5 }}>GET /Route</Typography>
-      <Typography variant="h5" sx={{ mb: 1.5 }}>Rutas</Typography>
+      <Typography variant="h5" sx={{ pt: 1.5, mb: 1.5 }}>Rutas</Typography>
 
       <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
         <Select
@@ -30,7 +31,7 @@ export default function RoutesScreen() {
         </Select>
         <IconButton
           disabled={!agency}
-          onClick={() => saveFavAgency(isFav ? '' : agency)}
+          onClick={() => toggleFavAgency(isFav ? '' : agency)}
           sx={{ color: isFav ? 'warning.main' : 'text.secondary' }}
           title="Marcar como favorita"
         >

@@ -11,11 +11,13 @@ interface NavSnapshot {
 interface AppState extends NavSnapshot {
   query: string;
   agency: string;
+  favAgency: string;
   themeMode: 'light' | 'dark';
   navStack: NavSnapshot[];
   toggleTheme: () => void;
   setQuery: (q: string) => void;
   setAgency: (id: string) => void;
+  toggleFavAgency: (id: string) => void;
   goTab: (tab: Tab) => void;
   navToRoute: (routeId: string, dir?: 0 | 1) => void;
   navToStop: (stopId: string) => void;
@@ -23,6 +25,8 @@ interface AppState extends NavSnapshot {
   setDir: (d: 0 | 1) => void;
   toggleRouteMap: () => void;
   back: () => void;
+  /** Uso interno: la mutación real de "volver", disparada por el listener de popstate. */
+  _popNav: () => void;
 }
 
 const FAV_KEY = 'gtfsviewer.favAgency';
@@ -36,7 +40,7 @@ function snapshot(s: AppState): NavSnapshot {
 
 export const useAppStore = create<AppState>((set, get) => ({
   view: 'home', tab: 'home', routeId: null, routeTab: 'paradas', routeParadasMode: 'list', dir: 0, stopId: null,
-  query: '', agency: loadFavAgency(),
+  query: '', agency: loadFavAgency(), favAgency: loadFavAgency(),
   themeMode: (() => {
     try { const saved = localStorage.getItem(THEME_KEY); if (saved === 'light' || saved === 'dark') return saved; } catch {}
     return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
@@ -50,27 +54,50 @@ export const useAppStore = create<AppState>((set, get) => ({
   }),
   setQuery: (q) => set({ query: q }),
   setAgency: (id) => set({ agency: id }),
+  toggleFavAgency: (id) => { saveFavAgency(id); set({ favAgency: id }); },
   goTab: (tab) => set({ tab, view: 'home', routeId: null, stopId: null, query: '', navStack: [] }),
 
-  navToRoute: (routeId, dir = 0) => set((s) => {
-    // Desde Home/Rutas arranca una pila nueva; desde una ruta a otra, se pisa (son "hermanas");
-    // desde cualquier otro lado (p.ej. parada) se apila, así "volver" regresa ahí.
-    const stack =
-      s.view === 'home' ? [snapshot(s)] :
-      s.view === 'route' ? (s.navStack.length > 1 ? [s.navStack[0]] : s.navStack) :
-      [...s.navStack, snapshot(s)];
-    return { navStack: stack, view: 'route', routeId, routeTab: 'paradas', routeParadasMode: 'list', dir };
-  }),
-  navToStop: (stopId) => set((s) => {
-    const stack = s.view === 'home' ? [] : [...s.navStack, snapshot(s)];
-    return { navStack: stack, view: 'stop', stopId };
-  }),
+  navToRoute: (routeId, dir = 0) => {
+    pushHistoryEntry();
+    set((s) => {
+      // Desde Home/Rutas arranca una pila nueva; desde una ruta a otra, se pisa (son "hermanas");
+      // desde cualquier otro lado (p.ej. parada) se apila, así "volver" regresa ahí.
+      const stack =
+        s.view === 'home' ? [snapshot(s)] :
+        s.view === 'route' ? (s.navStack.length > 1 ? [s.navStack[0]] : s.navStack) :
+        [...s.navStack, snapshot(s)];
+      return { navStack: stack, view: 'route', routeId, routeTab: 'paradas', routeParadasMode: 'list', dir };
+    });
+  },
+  navToStop: (stopId) => {
+    pushHistoryEntry();
+    set((s) => {
+      const stack = s.view === 'home' ? [] : [...s.navStack, snapshot(s)];
+      return { navStack: stack, view: 'stop', stopId };
+    });
+  },
   setRouteTab: (t) => set({ routeTab: t }),
   setDir: (d) => set({ dir: d }),
   toggleRouteMap: () => set((s) => ({ routeParadasMode: s.routeParadasMode === 'map' ? 'list' : 'map' })),
-  back: () => set((s) => {
+  // El botón "Volver" de la UI dispara el back del navegador/dispositivo en vez de mutar
+  // directo — así ambos caminos (gesto/botón físico y botón en pantalla) pasan siempre
+  // por el mismo popstate y quedan sincronizados con la pila de navegación real.
+  back: () => { try { window.history.back(); } catch { get()._popNav(); } },
+  _popNav: () => set((s) => {
     const prev = s.navStack[s.navStack.length - 1];
     if (!prev) return { view: 'home', routeId: null, stopId: null };
     return { ...prev, navStack: s.navStack.slice(0, -1) };
   })
 }));
+
+function pushHistoryEntry() {
+  try { window.history.pushState({ gtfsNav: true }, ''); } catch {}
+}
+
+// Flag en window (no en el módulo) para que sobreviva al HMR de Vite en dev y no se
+// dupliquen listeners cada vez que este archivo se re-evalúa.
+declare global { interface Window { __gtfsBackListenerAttached?: boolean } }
+if (typeof window !== 'undefined' && !window.__gtfsBackListenerAttached) {
+  window.__gtfsBackListenerAttached = true;
+  window.addEventListener('popstate', () => useAppStore.getState()._popNav());
+}
