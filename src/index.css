@@ -4,3 +4,12 @@
 html, body, #root {
   overscroll-behavior-y: contain;
 }
+
+/* 100vh en mobile no descuenta la barra de direcciones/toolbar del navegador (sí lo hace
+   dentro de una PWA instalada, por eso ahí no se notaba) — el contenedor terminaba más alto
+   que el área visible y empujaba el bottom nav fuera de la vista. 100dvh sí la descuenta;
+   dejamos 100vh como fallback para navegadores viejos que no soportan dvh. */
+.app-root {
+  height: 100vh;
+  height: 100dvh;
+}

@@ -1,7 +1,10 @@
+import { readFileSync } from 'node:fs';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import basicSsl from '@vitejs/plugin-basic-ssl';
 import { VitePWA } from 'vite-plugin-pwa';
+
+const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf-8'));
 
 // Dev-only proxy: lets `npm run dev` talk to the API same-origin,
 // sidestepping CORS while the backend team finishes their config.
@@ -13,6 +16,10 @@ import { VitePWA } from 'vite-plugin-pwa';
 // certificado autofirmado. El navegador va a mostrar una advertencia de certificado
 // no confiable la primera vez — hay que aceptarla ("Avanzado" → "Continuar").
 export default defineConfig({
+  define: {
+    // Versión mostrada en la UI (AppShell) — se maneja bumpeando "version" en package.json.
+    __APP_VERSION__: JSON.stringify(pkg.version)
+  },
   plugins: [
     react(),
     basicSsl(),

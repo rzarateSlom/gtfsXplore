@@ -14,6 +14,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
       <AppBar position="static" color="primary" elevation={4}>
         <Toolbar sx={{ gap: 1.5 }}>
           <Typography variant="h6" sx={{ whiteSpace: 'nowrap' }}>Visor GTFS</Typography>
+          <Typography variant="caption" sx={{ opacity: 0.7, whiteSpace: 'nowrap' }}>v{__APP_VERSION__}</Typography>
           <Box sx={{ flex: 1 }} />
           <IconButton color="inherit" onClick={toggleTheme} aria-label="Cambiar tema">
             {themeMode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}

@@ -28,7 +28,7 @@ export default function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <div style={{ height: '100vh' }}>
+      <div className="app-root">
         <AppShell>
           {anyError ? (
             <ConnectionScreen
